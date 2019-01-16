@@ -1,6 +1,6 @@
 {
     "name": "david/otsuka_signal_dmd_aim",
-    "type": "otsuka_signal_dmd_aim",
+    "type": "drupal-custom-module",
     "authors": [
         {
             "name": "david zahler",
