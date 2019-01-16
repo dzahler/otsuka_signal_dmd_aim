@@ -13,4 +13,4 @@ to manage the settings for this module. Configure permissions as usual at:
  * Set Site ID
  * todo: Inject other adobe snippets to support this code?
 
- Tagged build 1.0.0
+Master 
