@@ -1,0 +1,11 @@
+{
+    "name": "david/otsuka_signal_dmd_aim",
+    "type": "otsuka_signal_dmd_aim",
+    "authors": [
+        {
+            "name": "david zahler",
+            "email": "david.zahler-cw@otsuka-us.com"
+        }
+    ],
+    "require": {}
+}
