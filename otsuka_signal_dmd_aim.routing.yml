@@ -1,0 +1,7 @@
+otsuka_signal_dmd_aim.settings_form:
+  path: '/admin/config/system/otsuka_signal_dmd_aim'
+  defaults:
+    _title: 'Otsuka Signal & DMD AIM Manager'
+    _form: '\Drupal\otsuka_signal_dmd_aim\Form\OtsukaSignalDmdAimSettingsForm'
+  requirements:
+    _permission: 'administer otsuka signal dmd aim manager'

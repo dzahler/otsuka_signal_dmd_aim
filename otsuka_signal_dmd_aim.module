@@ -1,0 +1,168 @@
+<?php
+
+/**
+ * @file
+ * Provides support for signal tracking code.
+ *
+ * Adds a JavaScript snippet to selected page responses for analytics purposes.
+ */
+
+/**
+ * Dynamic script function, gets id from form.
+ */
+function _otsuka_signal_dmd_aim_script_snippet($type, $id) {
+  if ($type == "signal") {
+    $script =
+    '(function () {
+        var tagjs = document.createElement("script");
+        var s = document.getElementsByTagName("script")[0];
+        tagjs.async = true;
+        tagjs.src = "//s.btstatic.com/tag.js#site=' . $id . '";
+        s.parentNode.insertBefore(tagjs, s);
+      }());';
+  }
+  elseif ($type == "aim") {
+    $sourceMode = trim(\Drupal::config('otsuka_signal_dmd_aim.settings')->get('aim_source_mode'));
+    $script = "
+    (function(w,d,s,m,n,t){
+          w[m]=w[m]||{init:function(){(w[m].q=w[m].q||[]).push(arguments);},ready:function(c)
+          {if('function'!=typeof c){return;}n.onload=n.onreadystatechange=function(){if(!n.
+          readyState||/loaded|complete/.test(n.readyState)){n.onload=n.onreadystatechange=null;if(t.
+          parentNode){if(n.parentNode){t.parentNode.removeChild(n);}}if(c){c();}}};}}, w[m].
+          d=1*new Date();n=d.createElement(s);t=d.getElementsByTagName(s)[0];n.async=1;n.src='//" . $sourceMode .
+          ".medtargetsystem.com/javascript/beacon.js?v2.5.11';"; 
+    if ($sourceMode == 'uat'){
+      $script .= "n.setAttribute(\"data-sub\",'uat');";
+    }
+    $script .="t.parentNode.insertBefore(n,t);})
+          (window,document,'script','AIM');
+ 
+    function otsk_AIMHandler(visitorObj){
+          window._aimVisitorObj = visitorObj;
+          sessionStorage.setItem('AIMVisitorObj', JSON.stringify(visitorObj));\n";
+    if ($sourceMode == 'uat'){
+      $script .= "          console.log('AIM Handler Called: '+(!!visitorObj ? JSON.stringify(visitorObj) : 'null'));\n";
+    }
+
+    $script .=
+          "    }
+      AIM.ready(function(){
+          AIM.ondetect(otsk_AIMHandler);
+      });
+        
+          AIM.init('" . $id . "');\n";
+  }
+  return $script;
+}
+
+/**
+ * If the snippet is in the top of the page, put the script in the head
+ */
+function otsuka_signal_dmd_aim_page_attachments(array &$attachments){
+  $snippet_location = trim(\Drupal::config('otsuka_signal_dmd_aim.settings')->get('snippet_location'));
+
+  if ($snippet_location == 'bottom')
+    return;
+
+  $signal_id = trim(\Drupal::config('otsuka_signal_dmd_aim.settings')->get('signal_site_id'));
+  $aim_id = trim(\Drupal::config('otsuka_signal_dmd_aim.settings')->get('site_id'));
+  
+  $attachments['#attached']['html_head'][] = [
+    [
+      '#type' => 'html_tag',
+      '#tag' => 'script',
+      '#value' => _otsuka_signal_dmd_aim_script_snippet("signal", $signal_id),
+      '#weight' => 99,
+      '#attributes' => [
+        'defer' => 'defer',
+        'type' => "text/javascript",
+      ],
+    ],
+    'signal_tag',
+  ];
+
+  if (!empty($aim_id)) {
+    $attachments['#attached']['html_head'][] = [
+      [
+        '#type' => 'html_tag',
+        '#tag' => 'script',
+        '#value' => _otsuka_signal_dmd_aim_script_snippet("aim", $aim_id),
+        '#weight' => 100,
+        '#attributes' => [
+          'type' => "text/javascript",
+        ],
+      ],
+      'aim_tag',
+    ];
+  }
+}
+
+/**
+ * Appends markup in page_bottom region, requires $page_bottom to be rendered in html.html.twig.
+ */
+function otsuka_signal_dmd_aim_page_bottom(array &$page_bottom) {
+  $snippet_location = trim(\Drupal::config('otsuka_signal_dmd_aim.settings')->get('snippet_location'));
+
+  if ($snippet_location == 'bottom')
+    _place_on_page($page_bottom, $snippet_location);
+}
+
+/**
+ * Appends markup in page_top region, requires $page_top to be rendered in html.html.twig.
+ */
+function otsuka_signal_dmd_aim_page_top(array &$page_top) {
+  $snippet_location = trim(\Drupal::config('otsuka_signal_dmd_aim.settings')->get('snippet_location'));
+
+  if ($snippet_location == 'top')
+    _place_on_page($page_top, $snippet_location);
+}
+
+/**
+ * Actually injects the inline code, dependent upon where it needs to be placed
+ */
+function _place_on_page(array &$page_location, string &$location){
+  $signal_id = trim(\Drupal::config('otsuka_signal_dmd_aim.settings')->get('signal_site_id'));
+
+  if (!empty($signal_id)) {
+    if ($location == 'bottom'){
+      $page_location['otsuka_signal'] = [
+        '#type' => 'html_tag',
+        '#tag' => 'script',
+        '#value' => _otsuka_signal_dmd_aim_script_snippet("signal", $signal_id),
+        '#attributes' => [
+          'defer' => 'defer',
+          'type' => "text/javascript",
+        ],
+      ];
+    }
+
+    $page_location['otsuka_signal_iframe'] = [
+      '#type' => 'html_tag',
+      '#tag' => 'iframe',
+      '#attributes' => [
+        'src' => '//s.thebrighttag.com/iframe?c=' . trim($signal_id),
+        'frameborder' => "0",
+        'scrolling' => "no",
+        'marginheight' => "0",
+        'marginwidth' => "0",
+        'height' => "1",
+        'width' => "1",
+      ],
+      '#noscript' => TRUE,
+      '#allowed_tags' => ['iframe'],
+    ];
+  }
+
+  $aim_id = trim(\Drupal::config('otsuka_signal_dmd_aim.settings')->get('site_id'));
+
+  if (!empty($aim_id) && $location == 'bottom') {
+    $page_location['otsuka_signal_dmd_aim'] = [
+      '#type' => 'html_tag',
+      '#tag' => 'script',
+      '#value' => _otsuka_signal_dmd_aim_script_snippet("aim", $aim_id),
+      '#attributes' => [
+        'type' => "text/javascript",
+      ],
+    ];
+  }
+}

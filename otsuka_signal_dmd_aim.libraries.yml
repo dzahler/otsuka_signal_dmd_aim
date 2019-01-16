@@ -1,0 +1,4 @@
+otsuka_signal_dmd_aim:
+  js:
+    js/mask.min.js: {}
+    js/otsuka_signal_dmd_aim.js: {}

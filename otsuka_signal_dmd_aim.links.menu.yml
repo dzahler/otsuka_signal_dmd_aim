@@ -1,0 +1,5 @@
+otsuka_signal_dmd_aim.settings_form:
+  title: 'Otsuka Signal & DMD AIM Manager'
+  description: 'Configure the website integration with Signal and DMD AIM.'
+  route_name: otsuka_signal_dmd_aim.settings_form
+  parent: system.admin_config_system

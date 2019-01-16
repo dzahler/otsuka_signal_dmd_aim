@@ -1,0 +1,56 @@
+<?php
+
+/**
+ * @file
+ * Provides requirement function.
+ */
+
+/**
+ * Implements hook_requirements().
+ */
+function otsuka_signal_dmd_aim_requirements($phase) {
+  $requirements = [];
+
+  if ($phase == 'runtime') {
+
+    $signal_id = \Drupal::config('otsuka_signal_dmd_aim.settings')->get('signal_site_id');
+    if (empty($signal_id)) {
+      $requirements['otsuka_signal_dmd_aim'] = [
+        'title' => t('Signal'),
+        'description' => t('Signal Site ID is not set.'),
+        'value' => t('Not Set'),
+        'severity' => REQUIREMENT_WARNING,
+      ];
+    }
+    else {
+      $requirements['otsuka_signal_dmd_aim'] = [
+        'title' => t('Signal'),
+        'description' => t('Signal Site ID is set.'),
+        'value' => $signal_id,
+        'severity' => REQUIREMENT_OK,
+      ];
+    }
+
+    $aim_id = \Drupal::config('otsuka_signal_dmd_aim.settings')
+      ->get('site_id');
+    if (empty($aim_id)) {
+      $requirements['otsuka_signal_dmd_aim'] = [
+        'title' => t('DMD AIM'),
+        'description' => t('DMD AIM ID is not set.'),
+        'value' => t('Not Set'),
+        'severity' => REQUIREMENT_WARNING,
+      ];
+    }
+    else {
+      $requirements['otsuka_signal_dmd_aim'] = [
+        'title' => t('DMD AIM'),
+        'description' => t('DMD AIM ID set.'),
+        'value' => $aim_id,
+        'severity' => REQUIREMENT_OK,
+      ];
+    }
+
+  }
+
+  return $requirements;
+}

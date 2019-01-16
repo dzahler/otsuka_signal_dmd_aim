@@ -1,0 +1,6 @@
+name: 'Otsuka Signal & DMD AIM Manager'
+type: module
+description: 'Allows your website analytics to be managed using Otsuka Signal and DMD AIM Manager.'
+package: 'Statistics'
+core: 8.x
+configure: otsuka_signal_dmd_aim.settings_form
